@@ -1,0 +1,128 @@
+Sentinel for Arion Masternodes
+===============================
+
+=== Installation ===
+----------------
+
+Ubuntu 16.04 / 18.04 assumed.
+
+All commands are to be executed as root user.
+The '#' character preceeding the shell commands is not part of the command.
+It is simply a symbol to show that you are at the command shell of root user.
+Do not type that in!
+
+
+Step 1. Prepare vps for Sentinel
+	a. logon to your vps as root
+
+	b. Make sure Python version 2.7.x or above is installed:
+
+    	# python --version
+
+	c. Update system packages and ensure virtualenv is installed:
+
+    	# apt-get update
+    	# apt-get install git
+    	# apt-get -y install python-virtualenv
+
+	d. Clone the sentinel into /root directory
+
+		# git clone https://github.com/gdiscord/arionSentinel.git && mv arionSentinel/sentinel /root && rm -R arionSentinel
+
+(You should now have /root/sentinel)
+
+	e. Install Sentinel
+
+    	# cd /root/sentinel
+    	# virtualenv ./venv
+    	# ./venv/bin/pip install -r requirements.txt
+
+
+Step 2. Configure your sentinel installation.
+
+	==========
+	Option 1: Choose this option only if, for example, you run your MN under a user called arion_mn1.
+	==========
+	a. Copy /root/sentinel folder to your MN user home directory
+
+		# cp -R /root/sentinel /home/arion_mn1
+
+	b. Next, edit /home/arion_mn1/sentinel/sentinel.conf file
+
+		# nano /home/arion_mn1/sentinel/sentinel.conf 
+
+	c. Now, put the path to your arion.conf file
+ 		arion_conf=/home/arion_mn1/.arioncore/arion.conf
+
+		Exit the nano editor by pressing ctrl + x keys, then type y and press return key (Enter).
+
+	d. change file permissions 
+
+		# chown -R arion_mn1:arion_mn1 /home/arion_mn1
+
+	e. Make an entry in crontab to start sentinel
+
+		# crontab -e
+
+		Scroll all the way to the bottom of the editor and add the entry on one line as:
+
+		* * * * * cd /home/arion_mn1/sentinel && su arion_mn1 -c "./venv/bin/python bin/sentinel.py >/dev/null 2>&1 >> arion_mn1_sentinel.log".
+		_______________________________
+
+	==========
+	Option 2: Choose this option only if, for example, you run your MN under /root/.arion_mn1. You need to execute the commands as:
+	==========
+	
+	a. Copy /root/sentinel folder to your MN data directory
+
+		# cp -R /root/sentinel /root/.arion_mn1
+
+	b. Next, edit /root/.arion_mn1/sentinel/sentinel.conf file
+
+		# nano /root/.arion_mn1/sentinel/sentinel.conf 
+
+	c. Now, put the path to your arion.conf file
+ 		arion_conf=/root/.arion_mn1/arion.conf
+
+		Exit the nano editor by pressing ctrl + x keys, then type y and press return key (Enter).
+
+	d. Make an entry in crontab to start sentinel
+
+		# crontab -e
+
+		Scroll all the way to the bottom of the editor and add the entry on one line as:
+
+		* * * * * cd /root/.arion_mn1/sentinel && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1 >> arion_mn1_sentinel.log
+		_______________________________
+
+
+Installation and configuration of sentinel is now complete.
+
+Repeat Step 2 instructions for each MN on this vps (You must have an entry for each MN in crontab).
+
+
+Enjoy!
+
+
+-----------
+
+								
+
+
+
+**Note**
+===========================================================================================================
+Errors from the sentinel are logged into the file appended at the end of the line in crontab ( >> arion_mn1_sentinel.log)
+The file can grow over time if there are errors from sentinel. 
+You may remove this from the crontab once your sentinel is working fine and not outputting errors by removing the string below (including '>>') from your crontab:
+
+ >> arion_mn1_sentinel.log
+
+Alternatively, you could manually delete the file from the corresponding sentinel folder as follows:
+
+	# rm /home/arion_mn1/sentinel/arion_mn1_sentinel.log
+	# rm /root/.arion_mn1/sentinel/arion_mn1_sentinel.log
+===========================================================================================================
+
+
+
